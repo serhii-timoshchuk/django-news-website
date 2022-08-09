@@ -110,3 +110,23 @@ class CustomUserCreationFormTests(TestCase):
         self.assertFalse(form1.is_valid())
         self.assertFalse(form2.is_valid())
         self.assertFalse(form3.is_valid())
+
+    def test_cant_crate_user_with_is_active_true(self):
+        """Test can`t create user with parameter is_active equals True"""
+        new_user_data = {'is_active': True}
+        new_user_data.update(self.USER_DATA)
+        form = CustomUserCreationForm(data=new_user_data)
+        form.save()
+
+        user = get_user_model().objects.get(email=self.USER_DATA['email'])
+        self.assertFalse(user.is_active)
+
+    def test_cant_create_user_with_is_staff_true(self):
+        """Test can`t create user with parameter is_staf equals True"""
+        new_user_data = {'is_staff': True}
+        new_user_data.update(self.USER_DATA)
+        form = CustomUserCreationForm(data=new_user_data)
+        form.save()
+
+        user = get_user_model().objects.get(email=self.USER_DATA['email'])
+        self.assertFalse(user.is_staff)

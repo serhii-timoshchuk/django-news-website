@@ -19,7 +19,7 @@ class UserModelTests(TestCase):
         self.assertTrue(user.check_password(password))
 
     def test_create_user_is_active_false(self):
-        """Test user creates with is_active equal False"""
+        """Test user creates with is_active equal False by default"""
         email = 'test@example.com'
         password = 'goodpassword123'
         user = get_user_model().objects.create_user(
