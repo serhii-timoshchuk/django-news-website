@@ -8,6 +8,8 @@ from django.contrib.auth import login, logout, authenticate
 
 
 def loginpage_view(request):
+    if request.user.is_authenticated:
+        return redirect('user:registration')
     if request.method == 'GET':
         return render(
             request,
