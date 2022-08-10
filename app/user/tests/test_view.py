@@ -234,12 +234,32 @@ class LoginViewTest(TestCase):
         self.assertEqual(res.status_code, 302)
 
     def test_login_only_on_post_request(self):
+        """Test only POST request make user authorization"""
 
         res = self.client.get(
             LOGIN_URL,
             self.good_credentials,
             follow=True)
         self.assertFalse(res.context['user'].is_authenticated)
+
+    def test_authenticated_user_cant_login_twice(self):
+        """Test authenticated users get a redirect on trying to get a login URL"""
+        self.client.post(
+            LOGIN_URL,
+            self.good_credentials)
+
+        res1 = self.client.get(LOGIN_URL)
+        res2 = self.client.post(LOGIN_URL)
+        res3 = self.client.post(
+            LOGIN_URL,
+            self.good_credentials)
+
+        for x in [res1, res2, res3]:
+            self.assertEqual(x.status_code, 302)
+
+
+
+# add test dont show to authenticated users
 
 # class LogoutViewTest(TestCase):
 #     """Tests for logout view"""
