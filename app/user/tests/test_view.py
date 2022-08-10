@@ -206,7 +206,6 @@ class LoginViewTest(TestCase):
 
     def test_login_is_successful(self):
         """Test active user can log in"""
-
         res = self.client.post(
             LOGIN_URL,
             self.good_credentials,
@@ -243,7 +242,8 @@ class LoginViewTest(TestCase):
         self.assertFalse(res.context['user'].is_authenticated)
 
     def test_authenticated_user_cant_login_twice(self):
-        """Test authenticated users get a redirect on trying to get a login URL"""
+        """Test authenticated users get a redirect
+         on trying to get a login URL"""
         self.client.post(
             LOGIN_URL,
             self.good_credentials)
@@ -258,30 +258,40 @@ class LoginViewTest(TestCase):
             self.assertEqual(x.status_code, 302)
 
 
+class LogoutViewTest(TestCase):
+    """Tests for logout view"""
 
-# add test dont show to authenticated users
+    def setUp(self):
+        self.user = create_user(**{'is_active': True})
 
-# class LogoutViewTest(TestCase):
-#     """Tests for logout view"""
-#
-#     def setUp(self):
-#         self.email = 'example@example.com'
-#         self.name = 'TEst name'
-#         self.password = 'testpassword123'
-#
-#     def test_raise_redirect_for_unauthenticated_users(self):
-#         """Test redirect to login page for unauthenticated users"""
-#         res = self.client.get(LOGOUT_URL)
-#
-#         self.assertEqual(res.status_code, 302)
+    def test_raise_redirect_for_unauthenticated_users(self):
+        """Test redirect to login page for unauthenticated users"""
+        res1 = self.client.get(LOGOUT_URL)
+        res2 = self.client.post(LOGOUT_URL)
 
-    # def test_logout_successful(self):
-    #     """Test logout successful"""
-    #     self.client.post(REGISTRATION_URL, data={
-    #         'email': self.email,
-    #         'name': self.name,
-    #         'password1': self.password,
-    #         'password2': self.password,
-    #     })
-    #
-    #     res = self.client.post(LOGOUT_URL)
+        self.assertEqual(res1.status_code, 302)
+        self.assertEqual(res2.status_code, 302)
+
+    def test_logout_successful(self):
+        """Test logout successful"""
+        self.client.force_login(user=self.user)
+
+        res = self.client.post(LOGOUT_URL, follow=True)
+
+        self.assertFalse(res.context['user'].is_authenticated)
+
+    def test_log_out_only_on_post_request(self):
+        """Test user can log out only on POST request"""
+        self.client.force_login(user=self.user)
+
+        self.client.get(LOGOUT_URL, follow=True)
+        res = self.client.get(REGISTRATION_URL, follow=True)
+
+        self.assertTrue(res.context.get('user').is_authenticated)
+
+    def test_redirect_after_log_out(self):
+        """Test redirect after success log out"""
+        self.client.force_login(user=self.user)
+
+        res = self.client.post(LOGOUT_URL)
+        self.assertEqual(res.status_code, 302)
